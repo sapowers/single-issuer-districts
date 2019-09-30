@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+    
+    
+  #figure1{
+			position: -webkit-sticky;
+			position: sticky;
+			left: 25%;
+            top: 12.5%;
+			width: 50%;
+            height: 75%;
+			margin: 0;
+			-webkit-transform: translate3d(0, 0, 0);
+			-moz-transform: translate3d(0, 0, 0);
+			transform: translate3d(0, 0, 0);
+			background-color: none;
+             display: inline-block;
+             vertical-align: top;
+            padding-top: 25%;
+		}
+    
+    
+.svg-content {
+    display: inline-flex;
+    position: absolute;
+    top: 0;
+    left: 0
+}
+    
+
+.counties {
+  fill: none;
+stroke: #000;
+stroke-linejoin: round;
+stroke-width: .25;
+position: relative;
+width: 100%;
+    }
+
+.states {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+}
+    
+
+
+
+
+</style>
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="https://d3js.org/d3-queue.v3.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+
+
+<body fill = '#fcfcfc'>
+<!-- Create an element where the map will take place -->
+<div id = 'figure1'>
+
+</div>
+    
+ </body>
+
+<script>
+
+var mapFile = "https://d3js.org/us-10m.v1.json";
+    
+    
+function drawBaseMap() {
+    
+    
+ var mapsvg = d3.select("#figure1")
+     .append("svg")
+     .attr("preserveAspectRatio", "xMinYMin meet")
+     .attr("viewBox", "0 0 950 600")
+    .attr('id', 'map')
+    .classed("svg-content", true);
+        
+    
+var margin = {top: 10, left: 10, bottom: 10, right: 10}
+  , width = parseInt(d3.select('#map').style('width'))
+  , width = width - margin.left - margin.right
+  , mapRatio = .5
+  , height = width * mapRatio;
+    
+//var projection = d3;
+var path = d3.geoPath();
+ 
+    
+var promises = [
+  d3.json("https://d3js.org/us-10m.v1.json"),
+  d3.csv("plans_per_county.csv")
+]
+
+Promise.all(promises).then(ready)
+
+function ready([us]) {
+  mapsvg.append("g")
+        .classed("svg-content", true)
+ .attr("preserveAspectRatio", "xMinYMin meet")
+     .attr("viewBox", "0 0 2000 2000")
+    .selectAll("path")
+    .data(topojson.feature(us, us.objects.counties).features)
+    .enter().append("path")
+          .attr("class", "counties")
+
+      .attr("fill", "#8a8a8a")
+      .attr("d", path)
+    .append("title")
+      .text(function(d) { return d.rate + "%"; });
+
+  mapsvg.append("g") .attr("preserveAspectRatio", "xMinYMin meet")
+     .attr("viewBox", "0 0 2000 2000").append("path")
+
+      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+      .attr("class", "states")
+      .attr("d", path);
+}
+        };
+  
+drawBaseMap()
+    
+</script>
